@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "finbourne-sdk-utils"
-version = "0.0.37"
+version = "0.0.38"
 description = "Python utilities for LUSID V2 SDK"
 license = { text = "MIT" }
 authors = [
@@ -30,6 +30,7 @@ dependencies = [
     "finbourne-identity-sdk>2",
     "lusid-sdk>2",
     "lusid-configuration-sdk>2",
+    "pygments==2.20.0",
 ]
 
 [project.urls]
