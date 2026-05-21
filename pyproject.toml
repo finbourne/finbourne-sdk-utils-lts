@@ -4,16 +4,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "finbourne-sdk-utils"
-version = "0.0.38"
+version = "0.0.39"
 description = "Python utilities for LUSID V2 SDK"
 license = { text = "MIT" }
 authors = [
     { name = "FINBOURNE Technology", email = "engineering@finbourne.com" },
 ]
 keywords = ["FINBOURNE", "LUSID", "LUSID SDK", "python"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "urllib3>=1.26.9",
+    "urllib3>=2.7.0",
     "requests>=2.27.1",
     "coloredlogs>=14.0",
     "detect-delimiter>=0.1",
@@ -26,10 +26,10 @@ dependencies = [
     "pytz>=2019.3",
     "ipython==8.32",
     "lusidfeature",
-    "finbourne-access-sdk>2",
-    "finbourne-identity-sdk>2",
-    "lusid-sdk>2",
-    "lusid-configuration-sdk>2",
+    "finbourne-access-sdk>=2.4.4",
+    "finbourne-identity-sdk>=2.3.9",
+    "lusid-sdk>=2.3.116",
+    "lusid-configuration-sdk>=2.3.3",
     "pygments==2.20.0",
 ]
 
