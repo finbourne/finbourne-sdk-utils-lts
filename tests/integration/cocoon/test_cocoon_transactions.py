@@ -682,6 +682,82 @@ class CocoonTestsTransactions(unittest.TestCase):
             scope=scope, code=code
         )
 
+    def test_return_unmatched_transactions_with_limit_paginates_and_returns_all(
+            self,
+    ):
+        """
+        A limit smaller than the number of unmatched transactions forces the GetTransactions response across
+        multiple pages. This verifies the limit is passed through to the API and that the pagination loop in
+        return_unmatched_transactions reassembles every page into the full result.
+        """
+        scope = "unmatched_transactions_limit_test"
+        code = "MIS_INST_FUND"
+
+        data_frame = pd.read_csv(
+            Path(__file__).parent.joinpath(
+                "data/transactions_unmatched_instruments.csv"
+            )
+        )
+
+        # Create a test portfolio
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "display_name": "portfolio_name",
+                "base_currency": "base_currency",
+            },
+            file_type="portfolio",
+            mapping_optional={"created": "$2000-01-01"},
+        )
+
+        # Upsert some transactions; one with known id, four with unknown ids
+        cocoon.cocoon.load_from_data_frame(
+            api_factory=self.api_factory,
+            scope=scope,
+            data_frame=data_frame,
+            mapping_required={
+                "code": "portfolio_code",
+                "transaction_id": "txn_id",
+                "type": "txn_type",
+                "transaction_date": "txn_trade_date",
+                "settlement_date": "txn_settle_date",
+                "units": "txn_units",
+                "transaction_price.price": "txn_price",
+                "transaction_price.type": "$Price",
+                "total_consideration.amount": "txn_consideration",
+                "total_consideration.currency": "currency",
+            },
+            file_type="transaction",
+            identifier_mapping={
+                "ClientInternal": "instrument_id",
+                "Sedol": "sedol",
+                "Ticker": "ticker",
+                "Name": "name",
+            },
+            mapping_optional={},
+        )
+
+        # With a limit of 1, the four unmatched transactions span four pages; the loop must reassemble them all
+        response = cocoon.cocoon.return_unmatched_transactions(
+            self.api_factory,
+            scope,
+            code,
+            from_transaction_date="2000-01-01",
+            to_transaction_date="2050-01-01",
+            limit=1,
+        )
+
+        # Assert that pagination returned every unmatched transaction despite the small per-page limit
+        self.assertEqual(len(response), 4)
+
+        # Delete the portfolio at the end of the test
+        self.api_factory.build(lusid.api.PortfoliosApi).delete_portfolio(
+            scope=scope, code=code
+        )
+
 
     @parameterized.expand(
         [

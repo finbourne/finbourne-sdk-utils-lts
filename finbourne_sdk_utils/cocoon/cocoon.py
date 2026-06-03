@@ -804,6 +804,7 @@ async def _construct_batches(
         sub_holding_keys: list,
         sub_holding_keys_scope: str,
         return_unmatched_items: bool,
+        limit: int | None = None,
         **kwargs,
 ):
     """
@@ -1019,6 +1020,7 @@ async def _construct_batches(
             file_type=file_type,
             returned_response=returned_response,
             sync_batches=sync_batches,
+            limit=limit
         )
 
     return returned_response
@@ -1057,6 +1059,7 @@ def unmatched_items(
         file_type: str,
         returned_response: dict,
         sync_batches: list = None,
+        limit: int | None = None,
 ):
     """
     This method orchestrates the identification of holdings or transactions objects that were successfully uploaded
@@ -1081,6 +1084,8 @@ def unmatched_items(
         The response from laod_from_data_frame
     sync_batches : list
         A list of the batches used to upload the data into LUSID.
+    limit : int | None
+        The maximum number of transactions that will be returned from the api per page
 
     Returns
     -------
@@ -1098,6 +1103,7 @@ def unmatched_items(
             data_frame=data_frame,
             mapping_required=mapping_required,
             sync_batches=sync_batches,
+            limit=limit,
         )
     elif file_type == "holding":
         return _unmatched_holdings(
@@ -1113,6 +1119,7 @@ def _unmatched_transactions(
         data_frame: pd.DataFrame,
         mapping_required: dict,
         sync_batches: list = None,
+        limit: int | None = None,
 ):
     """
     This method identifies which instruments were not resolved with a transaction upload using load_from_data_frame.
@@ -1162,6 +1169,7 @@ def _unmatched_transactions(
                 code=portfolio_code,
                 from_transaction_date=from_transaction_date,
                 to_transaction_date=to_transactions_date,
+                limit=limit
             )
         )
 
@@ -1179,6 +1187,7 @@ def return_unmatched_transactions(
         code: str,
         from_transaction_date: str,
         to_transaction_date: str,
+        limit: int | None = None,
 ):
     """
     Call the get transactions api and only return those transactions with unresolved identifiers.
@@ -1213,6 +1222,7 @@ def return_unmatched_transactions(
             "from_transaction_date": from_transaction_date,
             "to_transaction_date": to_transaction_date,
             "filter": "instrumentUid eq'LUID_ZZZZZZZZ'",
+            "limit": limit
         }
 
         if next_page is not None:
@@ -1374,6 +1384,7 @@ def load_from_data_frame(
         sub_holding_keys_scope: str = None,
         return_unmatched_items: bool = False,
         instrument_scope: str = None,
+        limit: int | None = None,
 ):
     """
 
@@ -1420,6 +1431,8 @@ def load_from_data_frame(
         transactions or holdings
     instrument_scope : str
         The scope to upsert to when upseting instrument
+    limit : int | None
+        The maximum number of transactions that will be returned from the api per page
 
     Returns
     -------
@@ -1851,6 +1864,7 @@ def load_from_data_frame(
             sub_holding_keys=sub_holding_keys,
             sub_holding_keys_scope=sub_holding_keys_scope,
             return_unmatched_items=return_unmatched_items,
+            limit=limit,
             **keyword_arguments,
         ),
         loop,
